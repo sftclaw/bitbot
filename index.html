@@ -36,25 +36,17 @@
             box-shadow: inset 3px 3px 8px rgba(0,0,0,0.2); overflow: hidden;
         }
 
-        /* Pixel Art Bot */
+        /* The Bot */
         .bot {
             width: 64px; height: 64px; background: var(--pixel-on); 
             position: relative; transition: all 0.3s;
             clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
         }
-        .face {
-            position: absolute; top: 16px; left: 12px; width: 40px; height: 32px;
-        }
-        .eye {
-            width: 8px; height: 8px; background: var(--screen-bg); position: absolute; top: 0;
-            animation: blink 4s infinite;
-        }
+        .face { position: absolute; top: 16px; left: 12px; width: 40px; height: 32px; }
+        .eye { width: 8px; height: 8px; background: var(--screen-bg); position: absolute; top: 0; animation: blink 4s infinite; }
         .eye.left { left: 4px; } .eye.right { right: 4px; }
-        .mouth {
-            width: 16px; height: 4px; background: var(--screen-bg); position: absolute; bottom: 4px; left: 12px;
-        }
+        .mouth { width: 16px; height: 4px; background: var(--screen-bg); position: absolute; bottom: 4px; left: 12px; }
 
-        /* Animations */
         @keyframes blink { 0%, 96%, 100% { transform: scaleY(1); } 98% { transform: scaleY(0.1); } }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } }
@@ -64,13 +56,12 @@
         .bot.sleeping { opacity: 0.7; transform: scale(0.9); }
         .bot.sleeping .eye { height: 2px; top: 3px; animation: none; }
 
-        /* Speech Bubble */
+        /* Updated Bubble */
         .bubble {
             position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
             background: var(--pixel-on); color: var(--screen-bg);
-            padding: 4px 8px; font-size: 0.7rem; font-weight: bold; white-space: nowrap;
+            padding: 4px 8px; font-size: 0.7rem; font-weight: bold;
             opacity: 0; transition: opacity 0.2s; pointer-events: none;
-            border: 2px solid var(--pixel-off);
         }
         .bubble.show { opacity: 1; }
         .bubble::after {
@@ -78,22 +69,25 @@
             border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid var(--pixel-on);
         }
 
-        /* Stats */
+        /* Clearer Stats */
         .stats-overlay {
-            position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px;
+            position: absolute; bottom: 12px; left: 15px; right: 15px; 
+            background: rgba(156, 163, 175, 0.8); padding: 5px; border: 1px solid var(--pixel-on);
         }
-        .stat-row { display: flex; align-items: center; gap: 6px; font-size: 0.6rem; color: var(--pixel-on); font-weight: 900; }
-        .stat-track { flex: 1; height: 6px; background: var(--pixel-off); border: 1px solid var(--pixel-on); }
-        .stat-fill { height: 100%; background: var(--pixel-on); width: 100%; }
+        .stat-row { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--pixel-on); font-weight: 900; margin-bottom: 3px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-label { width: 35px; }
+        .stat-track { flex: 1; height: 8px; background: rgba(255,255,255,0.3); border: 1px solid var(--pixel-on); }
+        .stat-fill { height: 100%; background: var(--pixel-on); width: 100%; transition: width 0.5s ease-out; }
 
         /* Controls */
-        .brand { margin-top: 15px; font-size: 0.9rem; color: #4b5563; font-weight: 900; letter-spacing: 2px; font-style: italic; }
+        .brand { margin-top: 15px; font-size: 0.9rem; color: #4b5563; font-weight: 900; letter-spacing: 2px; }
+        .controls-area { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; margin-top: 15px; }
         
-        .controls-area { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; margin-top: 10px; }
-        
-        .d-pad {
-            width: 90px; height: 90px; position: relative;
-        }
+        .control-group { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .group-label { font-size: 0.7rem; font-weight: 900; color: #6b7280; margin-bottom: 5px; text-transform: uppercase; }
+
+        .d-pad { width: 90px; height: 90px; position: relative; }
         .d-btn {
             position: absolute; background: #1f2937; border: none; cursor: pointer;
             width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
@@ -106,25 +100,16 @@
         .d-right { top: 30px; right: 0; border-radius: 0 4px 4px 0; }
         .d-center { top: 30px; left: 30px; background: #1f2937; }
 
-        .action-group { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .sleep-btn {
-            width: 60px; height: 25px; background: #1f2937; color: white; border: none;
-            border-radius: 12px; font-size: 0.7rem; font-weight: 900; letter-spacing: 1px;
-            box-shadow: 0 2px 0 #000; cursor: pointer;
-        }
-        .sleep-btn:active { transform: translateY(2px); box-shadow: none; }
-
-        .action-btns { display: flex; gap: 20px; }
+        .action-btns { display: flex; gap: 25px; }
         .a-btn-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .a-btn {
-            width: 45px; height: 45px; border-radius: 50%; border: none; 
+            width: 50px; height: 50px; border-radius: 50%; border: none; 
             background: #991b1b; color: white; font-weight: 900; font-size: 1.2rem;
-            box-shadow: 0 3px 0 #7f1d1d; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 0 #7f1d1d; cursor: pointer;
         }
-        .a-btn:active { transform: translateY(3px); box-shadow: none; }
-        .b-btn { background: #1e40af; box-shadow: 0 3px 0 #1e3a8a; }
-        
-        .btn-label { font-size: 0.7rem; color: #4b5563; font-weight: 900; text-transform: uppercase; }
+        .a-btn:active { transform: translateY(4px); box-shadow: none; }
+        .b-btn { background: #1e40af; box-shadow: 0 4px 0 #1e3a8a; }
+        .btn-label { font-size: 0.75rem; color: #374151; font-weight: 900; }
 
     </style>
 </head>
@@ -133,47 +118,49 @@
         <div class="screen-bezel">
             <div class="power-led"></div>
             <div class="screen">
-                <div class="bubble" id="bubble">Hi!</div>
+                <div class="bubble" id="bubble">System Ready</div>
                 <div class="bot" id="bot">
                     <div class="face">
-                        <div class="eye left"></div>
-                        <div class="eye right"></div>
+                        <div class="eye left"></div><div class="eye right"></div>
                         <div class="mouth"></div>
                     </div>
                 </div>
                 <div class="stats-overlay">
-                    <div class="stat-row">PWR <div class="stat-track"><div class="stat-fill" id="hBar"></div></div></div>
-                    <div class="stat-row">BAT <div class="stat-track"><div class="stat-fill" id="eBar"></div></div></div>
-                    <div class="stat-row">FUN <div class="stat-track"><div class="stat-fill" id="fBar"></div></div></div>
+                    <div class="stat-row"><span class="stat-label">FOOD</span><div class="stat-track"><div class="stat-fill" id="hBar"></div></div></div>
+                    <div class="stat-row"><span class="stat-label">ENERGY</span><div class="stat-track"><div class="stat-fill" id="eBar"></div></div></div>
+                    <div class="stat-row"><span class="stat-label">FUN</span><div class="stat-track"><div class="stat-fill" id="fBar"></div></div></div>
                 </div>
             </div>
         </div>
 
         <div class="controls-area">
-            <div class="d-pad">
-                <button class="d-btn d-up">▲</button>
-                <button class="d-btn d-left">◀</button>
-                <button class="d-btn d-center"></button>
-                <button class="d-btn d-right">▶</button>
-                <button class="d-btn d-down" onclick="bitbot.toggleSleep()">▼</button>
+            <div class="control-group">
+                <div class="group-label">Interact</div>
+                <div class="d-pad">
+                    <button class="d-btn d-up" onclick="bitbot.pet()">▲</button>
+                    <button class="d-btn d-left">◀</button>
+                    <button class="d-btn d-center"></button>
+                    <button class="d-btn d-right">▶</button>
+                    <button class="d-btn d-down" onclick="bitbot.toggleSleep()">▼</button>
+                </div>
             </div>
             
-            <div class="action-group">
-                <button class="sleep-btn" onclick="bitbot.toggleSleep()">SLEEP</button>
+            <div class="control-group">
+                <div class="group-label">Actions</div>
                 <div class="action-btns">
                     <div class="a-btn-group">
                         <button class="a-btn" onclick="bitbot.feed()">A</button>
-                        <span class="btn-label">Feed</span>
+                        <span class="btn-label">FEED</span>
                     </div>
                     <div class="a-btn-group">
                         <button class="a-btn b-btn" onclick="bitbot.play()">B</button>
-                        <span class="btn-label">Play</span>
+                        <span class="btn-label">PLAY</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="brand">NINTENDO BIT-BOT</div>
+        <div class="brand">BIT-BOT v1.0</div>
     </div>
 
     <script>
@@ -184,18 +171,18 @@
             init() {
                 this.load();
                 this.calcOffline();
-                this.loop = setInterval(() => this.tick(), 4000);
+                this.loop = setInterval(() => this.tick(), 3000);
                 this.updateUI();
             },
 
             tick() {
                 if (this.state === 'sleeping') {
-                    this.stats.energy = Math.min(100, this.stats.energy + 5);
+                    this.stats.energy = Math.min(100, this.stats.energy + 4);
                     this.stats.hunger = Math.max(0, this.stats.hunger - 0.5);
                 } else {
                     this.stats.hunger = Math.max(0, this.stats.hunger - 1);
                     this.stats.energy = Math.max(0, this.stats.energy - 0.5);
-                    this.stats.joy = Math.max(0, this.stats.joy - 1.5);
+                    this.stats.joy = Math.max(0, this.stats.joy - 1);
                 }
                 this.save();
                 this.updateUI();
@@ -203,18 +190,24 @@
 
             feed() {
                 if (this.state === 'sleeping') return this.wake();
-                if (this.stats.hunger > 90) return this.say("Full!");
-                this.stats.hunger = Math.min(100, this.stats.hunger + 20);
-                this.anim('happy'); this.say("Yum!");
+                this.stats.hunger = Math.min(100, this.stats.hunger + 25);
+                this.anim('happy'); this.say("YUM!");
                 this.updateUI();
             },
 
             play() {
                 if (this.state === 'sleeping') return this.wake();
-                if (this.stats.energy < 15) return this.say("Tired...");
-                this.stats.joy = Math.min(100, this.stats.joy + 15);
+                if (this.stats.energy < 10) return this.say("LOW BAT");
+                this.stats.joy = Math.min(100, this.stats.joy + 20);
                 this.stats.energy -= 10;
-                this.anim('happy'); this.say("FUN!");
+                this.anim('happy'); this.say("WHEE!");
+                this.updateUI();
+            },
+
+            pet() {
+                if (this.state === 'sleeping') return this.wake();
+                this.stats.joy = Math.min(100, this.stats.joy + 5);
+                this.say("♥");
                 this.updateUI();
             },
 
@@ -229,7 +222,7 @@
 
             wake() {
                 this.state = 'idle';
-                this.say("Boot!");
+                this.say("ONLINE");
                 document.getElementById('bot').classList.remove('sleeping');
             },
 
@@ -263,7 +256,7 @@
                 if (hours > 0.1) {
                     this.stats.hunger = Math.max(0, this.stats.hunger - (hours * 5));
                     this.stats.joy = Math.max(0, this.stats.joy - (hours * 10));
-                    this.say("Missed u!");
+                    this.say("MISSED U");
                 }
             },
 
