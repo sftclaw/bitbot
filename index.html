@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bit-Bot 🤖</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <style>
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #38bdf8; --danger: #f43f5e; --success: #22c55e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; user-select: none; }
+        body { background: var(--bg); color: var(--accent); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .gameboy {
+            background: #e2e8f0; border-radius: 10px 10px 40px 10px; padding: 20px 20px 40px;
+            box-shadow: -5px 5px 0 #94a3b8, 0 20px 40px rgba(0,0,0,0.5); width: 320px; max-width: 100%;
+        }
+        .screen-border {
+            background: #475569; padding: 15px 20px; border-radius: 10px 10px 30px 10px; margin-bottom: 30px;
+        }
+        .screen {
+            background: #0f172a; border: 2px solid #334155; height: 250px; position: relative;
+            overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        
+        /* The Bit-Bot Character */
+        .bot {
+            width: 60px; height: 60px; background: var(--accent); border-radius: 8px;
+            position: relative; transition: all 0.3s; box-shadow: 0 0 15px var(--accent);
+        }
+        .bot::before { /* Eyes */
+            content: ''; position: absolute; top: 15px; left: 12px; width: 10px; height: 10px; background: var(--bg);
+            box-shadow: 26px 0 0 var(--bg); border-radius: 2px; animation: blink 4s infinite;
+        }
+        .bot::after { /* Mouth */
+            content: ''; position: absolute; bottom: 15px; left: 20px; width: 20px; height: 4px; background: var(--bg);
+        }
+        
+        /* Animations */
+        @keyframes blink { 0%, 98%, 100% { height: 10px; } 99% { height: 2px; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        
+        .bot.happy { animation: bounce 0.5s infinite; background: var(--success); box-shadow: 0 0 15px var(--success); }
+        .bot.sad { filter: grayscale(1); animation: shake 2s infinite; }
+        .bot.sleeping { opacity: 0.6; transform: scale(0.9); }
+        .bot.sleeping::before { height: 2px; top: 20px; }
+
+        .stats { display: flex; justify-content: space-between; padding: 0 10px; margin-top: 15px; font-size: 0.7rem; color: #334155; font-weight: bold; }
+        .stat-bar { width: 100%; height: 6px; background: #cbd5e1; margin-top: 4px; border-radius: 3px; overflow: hidden; }
+        .stat-fill { height: 100%; background: #334155; transition: width 0.5s; }
+
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 10px; }
+        .btn {
+            background: #f8fafc; border: none; border-bottom: 4px solid #cbd5e1; color: #334155;
+            padding: 15px; border-radius: 50%; width: 60px; height: 60px; font-weight: 900; font-size: 1.2rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 auto;
+        }
+        .btn:active { transform: translateY(4px); border-bottom: 0; }
+        .btn-red { background: #f43f5e; color: white; border-color: #be123c; }
+
+        .message {
+            position: absolute; top: 10px; width: 100%; text-align: center; font-size: 0.7rem;
+            color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .z-z {
+            position: absolute; top: -20px; right: -10px; font-size: 1.2rem; color: white;
+            animation: bounce 1s infinite; display: none;
+        }
+        .bot.sleeping .z-z { display: block; }
+    </style>
+</head>
+<body>
+    <div class="gameboy">
+        <div class="screen-border">
+            <div class="screen">
+                <div class="message" id="message">System Online...</div>
+                <div class="bot" id="bot"><div class="z-z">Zzz</div></div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div>
+                HUNGER
+                <div class="stat-bar"><div class="stat-fill" id="hungerBar" style="width: 100%"></div></div>
+            </div>
+            <div>
+                ENERGY
+                <div class="stat-bar"><div class="stat-fill" id="energyBar" style="width: 100%"></div></div>
+            </div>
+            <div>
+                JOY
+                <div class="stat-bar"><div class="stat-fill" id="joyBar" style="width: 100%"></div></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="bot.feed()" title="Feed">🍔</button>
+            <button class="btn" onclick="bot.toggleSleep()" title="Sleep">💤</button>
+            <button class="btn" onclick="bot.play()" title="Play">🎾</button>
+        </div>
+    </div>
+
+    <script>
+        const bot = {
+            stats: { hunger: 100, energy: 100, joy: 100, lastLogin: Date.now() },
+            state: 'idle', // idle, sleeping
+            
+            init() {
+                this.load();
+                this.calcOfflineDecay();
+                this.loop = setInterval(() => this.tick(), 2000);
+                this.updateUI();
+            },
+
+            tick() {
+                if (this.state === 'sleeping') {
+                    this.stats.energy = Math.min(100, this.stats.energy + 5);
+                    this.stats.hunger = Math.max(0, this.stats.hunger - 1);
+                } else {
+                    this.stats.hunger = Math.max(0, this.stats.hunger - 2);
+                    this.stats.energy = Math.max(0, this.stats.energy - 1);
+                    this.stats.joy = Math.max(0, this.stats.joy - 3);
+                }
+                
+                if (this.stats.hunger < 30 || this.stats.joy < 30) this.showMessage("I need attention!");
+                if (this.stats.energy < 10) this.showMessage("Battery Low...");
+                
+                this.save();
+                this.updateUI();
+            },
+
+            feed() {
+                if (this.state === 'sleeping') return this.wakeUp();
+                this.stats.hunger = Math.min(100, this.stats.hunger + 20);
+                this.stats.joy = Math.min(100, this.stats.joy + 5);
+                this.animate('happy', 1000);
+                this.showMessage("Delicious Data!");
+                this.updateUI();
+            },
+
+            play() {
+                if (this.state === 'sleeping') return this.wakeUp();
+                if (this.stats.energy < 10) return this.showMessage("Too tired to play...");
+                this.stats.joy = Math.min(100, this.stats.joy + 15);
+                this.stats.energy -= 10;
+                this.stats.hunger -= 5;
+                this.animate('happy', 1500);
+                this.showMessage("Fun! Fun! Fun!");
+                this.updateUI();
+            },
+
+            toggleSleep() {
+                if (this.state === 'sleeping') this.wakeUp();
+                else {
+                    this.state = 'sleeping';
+                    this.showMessage("Powering Down...");
+                    document.getElementById('bot').classList.add('sleeping');
+                }
+                this.updateUI();
+            },
+
+            wakeUp() {
+                this.state = 'idle';
+                this.showMessage("System Online!");
+                document.getElementById('bot').classList.remove('sleeping');
+            },
+
+            animate(className, duration) {
+                const el = document.getElementById('bot');
+                el.classList.add(className);
+                setTimeout(() => el.classList.remove(className), duration);
+            },
+
+            showMessage(text) {
+                const msg = document.getElementById('message');
+                msg.textContent = text;
+                setTimeout(() => { if(msg.textContent === text) msg.textContent = "Status: Normal"; }, 3000);
+            },
+
+            updateUI() {
+                document.getElementById('hungerBar').style.width = this.stats.hunger + '%';
+                document.getElementById('energyBar').style.width = this.stats.energy + '%';
+                document.getElementById('joyBar').style.width = this.stats.joy + '%';
+                
+                const el = document.getElementById('bot');
+                if (this.stats.hunger < 30 || this.stats.joy < 30) el.classList.add('sad');
+                else el.classList.remove('sad');
+            },
+
+            calcOfflineDecay() {
+                const now = Date.now();
+                const hoursPassed = (now - this.stats.lastLogin) / (1000 * 60 * 60);
+                if (hoursPassed > 0.1) {
+                    this.stats.hunger = Math.max(0, this.stats.hunger - (hoursPassed * 10));
+                    this.stats.joy = Math.max(0, this.stats.joy - (hoursPassed * 15));
+                    this.showMessage(`Missed you! (${hoursPassed.toFixed(1)}h)`);
+                }
+                this.stats.lastLogin = now;
+            },
+
+            save() { this.stats.lastLogin = Date.now(); localStorage.setItem('bitbot_save', JSON.stringify(this.stats)); },
+            load() { 
+                const save = localStorage.getItem('bitbot_save');
+                if (save) this.stats = { ...this.stats, ...JSON.parse(save) };
+            }
+        };
+
+        bot.init();
+    </script>
+</body>
+</html>
