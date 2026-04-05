@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#374151">
     <style>
-        :root { --case: #d1d5db; --screen-bg: #9ca3af; --pixel-on: #1f2937; --pixel-off: #6b7280; --accent: #3b82f6; }
+        :root { --case: #d1d5db; --screen-bg: #9ca3af; --pixel-on: #1f2937; --pixel-off: #6b7280; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; user-select: none; }
         body { 
             background: #e5e7eb; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -89,7 +89,8 @@
         /* Controls */
         .brand { margin-top: 15px; font-size: 0.9rem; color: #4b5563; font-weight: 900; letter-spacing: 2px; font-style: italic; }
         
-        .controls-area { width: 100%; display: flex; justify-content: space-around; align-items: center; padding: 0 10px; }
+        .controls-area { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; margin-top: 10px; }
+        
         .d-pad {
             width: 90px; height: 90px; position: relative;
         }
@@ -105,14 +106,25 @@
         .d-right { top: 30px; right: 0; border-radius: 0 4px 4px 0; }
         .d-center { top: 30px; left: 30px; background: #1f2937; }
 
-        .action-btns { display: flex; gap: 15px; }
+        .action-group { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .sleep-btn {
+            width: 60px; height: 25px; background: #1f2937; color: white; border: none;
+            border-radius: 12px; font-size: 0.7rem; font-weight: 900; letter-spacing: 1px;
+            box-shadow: 0 2px 0 #000; cursor: pointer;
+        }
+        .sleep-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .action-btns { display: flex; gap: 20px; }
+        .a-btn-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .a-btn {
             width: 45px; height: 45px; border-radius: 50%; border: none; 
-            background: #991b1b; color: white; font-weight: 900; font-size: 0.8rem;
+            background: #991b1b; color: white; font-weight: 900; font-size: 1.2rem;
             box-shadow: 0 3px 0 #7f1d1d; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
         .a-btn:active { transform: translateY(3px); box-shadow: none; }
         .b-btn { background: #1e40af; box-shadow: 0 3px 0 #1e3a8a; }
+        
+        .btn-label { font-size: 0.7rem; color: #4b5563; font-weight: 900; text-transform: uppercase; }
 
     </style>
 </head>
@@ -139,15 +151,25 @@
 
         <div class="controls-area">
             <div class="d-pad">
-                <button class="d-btn d-up" onclick="bitbot.interact('up')">▲</button>
-                <button class="d-btn d-left" onclick="bitbot.interact('left')">◀</button>
+                <button class="d-btn d-up">▲</button>
+                <button class="d-btn d-left">◀</button>
                 <button class="d-btn d-center"></button>
-                <button class="d-btn d-right" onclick="bitbot.interact('right')">▶</button>
+                <button class="d-btn d-right">▶</button>
                 <button class="d-btn d-down" onclick="bitbot.toggleSleep()">▼</button>
             </div>
-            <div class="action-btns">
-                <button class="a-btn" onclick="bitbot.feed()">A</button>
-                <button class="a-btn b-btn" onclick="bitbot.play()">B</button>
+            
+            <div class="action-group">
+                <button class="sleep-btn" onclick="bitbot.toggleSleep()">SLEEP</button>
+                <div class="action-btns">
+                    <div class="a-btn-group">
+                        <button class="a-btn" onclick="bitbot.feed()">A</button>
+                        <span class="btn-label">Feed</span>
+                    </div>
+                    <div class="a-btn-group">
+                        <button class="a-btn b-btn" onclick="bitbot.play()">B</button>
+                        <span class="btn-label">Play</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -196,14 +218,6 @@
                 this.updateUI();
             },
 
-            interact(dir) {
-                if (this.state === 'sleeping') return this.wake();
-                // Simple petting logic
-                this.stats.joy = Math.min(100, this.stats.joy + 5);
-                this.say("Hehe!");
-                this.updateUI();
-            },
-
             toggleSleep() {
                 if (this.state === 'sleeping') this.wake();
                 else {
@@ -222,7 +236,7 @@
             anim(cls) {
                 const el = document.getElementById('bot');
                 el.classList.remove(cls);
-                void el.offsetWidth; // Trigger reflow
+                void el.offsetWidth; 
                 el.classList.add(cls);
                 setTimeout(() => el.classList.remove(cls), 1500);
             },
