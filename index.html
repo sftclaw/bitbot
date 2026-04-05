@@ -7,207 +7,232 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <style>
-        :root { --bg: #0f172a; --panel: #1e293b; --accent: #38bdf8; --danger: #f43f5e; --success: #22c55e; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; user-select: none; }
-        body { background: var(--bg); color: var(--accent); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+        :root { --bg: #0f172a; --accent: #38bdf8; --danger: #f43f5e; --success: #22c55e; --warning: #fbbf24; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: #f1f5f9; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 20px;
+        }
         
-        .gameboy {
-            background: #e2e8f0; border-radius: 10px 10px 40px 10px; padding: 20px 20px 40px;
-            box-shadow: -5px 5px 0 #94a3b8, 0 20px 40px rgba(0,0,0,0.5); width: 320px; max-width: 100%;
+        .shell {
+            background: #e2e8f0; border-radius: 15px 15px 50px 15px; padding: 25px;
+            box-shadow: -6px 6px 0 #94a3b8, -6px 12px 20px rgba(0,0,0,0.15); 
+            width: 340px; max-width: 100%; display: flex; flex-direction: column; align-items: center;
         }
-        .screen-border {
-            background: #475569; padding: 15px 20px; border-radius: 10px 10px 30px 10px; margin-bottom: 30px;
+
+        .screen-bezel {
+            background: #334155; padding: 20px 25px; border-radius: 10px 10px 35px 10px; 
+            width: 100%; margin-bottom: 25px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
         }
+
         .screen {
-            background: #0f172a; border: 2px solid #334155; height: 250px; position: relative;
-            overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            background: #0f172a; border: 2px solid #475569; height: 240px; position: relative;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 15px #000; overflow: hidden;
         }
-        
-        /* The Bit-Bot Character */
+
+        /* The Bot */
+        .bot-container { position: relative; margin-top: 20px; }
         .bot {
-            width: 60px; height: 60px; background: var(--accent); border-radius: 8px;
-            position: relative; transition: all 0.3s; box-shadow: 0 0 15px var(--accent);
+            width: 64px; height: 64px; background: var(--accent); border-radius: 12px;
+            position: relative; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
         }
-        .bot::before { /* Eyes */
-            content: ''; position: absolute; top: 15px; left: 12px; width: 10px; height: 10px; background: var(--bg);
-            box-shadow: 26px 0 0 var(--bg); border-radius: 2px; animation: blink 4s infinite;
+        .eyes {
+            position: absolute; top: 18px; left: 12px; width: 10px; height: 10px; background: #0f172a;
+            box-shadow: 30px 0 0 #0f172a; border-radius: 2px; animation: blink 5s infinite;
         }
-        .bot::after { /* Mouth */
-            content: ''; position: absolute; bottom: 15px; left: 20px; width: 20px; height: 4px; background: var(--bg);
+        .mouth {
+            position: absolute; bottom: 18px; left: 22px; width: 20px; height: 4px; background: #0f172a; border-radius: 2px;
         }
-        
+        .antenna {
+            position: absolute; top: -12px; left: 28px; width: 8px; height: 12px; background: #94a3b8;
+        }
+        .antenna::after {
+            content: ''; position: absolute; top: -6px; left: -3px; width: 14px; height: 14px; 
+            background: var(--danger); border-radius: 50%; box-shadow: 0 0 10px var(--danger);
+        }
+
         /* Animations */
-        @keyframes blink { 0%, 98%, 100% { height: 10px; } 99% { height: 2px; } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes blink { 0%, 96%, 100% { height: 10px; } 98% { height: 2px; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } }
         
-        .bot.happy { animation: bounce 0.5s infinite; background: var(--success); box-shadow: 0 0 15px var(--success); }
-        .bot.sad { filter: grayscale(1); animation: shake 2s infinite; }
-        .bot.sleeping { opacity: 0.6; transform: scale(0.9); }
-        .bot.sleeping::before { height: 2px; top: 20px; }
+        .bot.happy { animation: float 0.6s infinite; background: var(--success); box-shadow: 0 0 20px var(--success); }
+        .bot.sad { filter: grayscale(0.8); animation: shake 3s infinite; background: var(--warning); }
+        .bot.sleeping { opacity: 0.7; transform: scale(0.95) translateY(5px); }
+        .bot.sleeping .eyes { height: 3px; top: 22px; animation: none; }
 
-        .stats { display: flex; justify-content: space-between; padding: 0 10px; margin-top: 15px; font-size: 0.7rem; color: #334155; font-weight: bold; }
-        .stat-bar { width: 100%; height: 6px; background: #cbd5e1; margin-top: 4px; border-radius: 3px; overflow: hidden; }
-        .stat-fill { height: 100%; background: #334155; transition: width 0.5s; }
+        /* UI Elements inside Screen */
+        .status-overlay {
+            position: absolute; top: 15px; left: 15px; right: 15px; display: flex; flex-direction: column; gap: 6px;
+        }
+        .stat-row { display: flex; align-items: center; gap: 8px; font-size: 0.6rem; color: #64748b; font-weight: bold; }
+        .stat-track { flex: 1; height: 4px; background: #1e293b; border-radius: 2px; overflow: hidden; }
+        .stat-val { height: 100%; background: var(--accent); transition: width 0.5s; }
+        
+        .bubble {
+            position: absolute; top: 30px; right: 30px; background: white; color: #0f172a;
+            padding: 5px 10px; border-radius: 10px 10px 0 10px; font-size: 0.7rem; font-weight: bold;
+            opacity: 0; transform: scale(0); transition: all 0.3s;
+        }
+        .bubble.show { opacity: 1; transform: scale(1); }
 
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 10px; }
-        .btn {
-            background: #f8fafc; border: none; border-bottom: 4px solid #cbd5e1; color: #334155;
-            padding: 15px; border-radius: 50%; width: 60px; height: 60px; font-weight: 900; font-size: 1.2rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 auto;
+        /* Controls Area */
+        .control-panel { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        
+        .d-pad-row { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; }
+        .action-btn {
+            background: #cbd5e1; border: none; border-bottom: 4px solid #94a3b8; color: #475569;
+            width: 50px; height: 50px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.1s;
         }
-        .btn:active { transform: translateY(4px); border-bottom: 0; }
-        .btn-red { background: #f43f5e; color: white; border-color: #be123c; }
+        .action-btn:active { transform: translateY(4px); border-bottom: 0; }
+        
+        .main-btn {
+            background: #f43f5e; color: white; border: none; border-bottom: 5px solid #be123c;
+            width: 70px; height: 70px; border-radius: 50%; font-size: 1.5rem; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(244, 63, 94, 0.3); transition: all 0.1s;
+        }
+        .main-btn:active { transform: translateY(5px); border-bottom: 0; box-shadow: none; }
 
-        .message {
-            position: absolute; top: 10px; width: 100%; text-align: center; font-size: 0.7rem;
-            color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .z-z {
-            position: absolute; top: -20px; right: -10px; font-size: 1.2rem; color: white;
-            animation: bounce 1s infinite; display: none;
-        }
-        .bot.sleeping .z-z { display: block; }
+        .brand { margin-top: 20px; font-size: 0.8rem; color: #94a3b8; font-weight: 900; letter-spacing: 2px; }
     </style>
 </head>
 <body>
-    <div class="gameboy">
-        <div class="screen-border">
+    <div class="shell">
+        <div class="screen-bezel">
             <div class="screen">
-                <div class="message" id="message">System Online...</div>
-                <div class="bot" id="bot"><div class="z-z">Zzz</div></div>
+                <div class="status-overlay">
+                    <div class="stat-row">PWR <div class="stat-track"><div class="stat-val" id="hungerVal" style="width:100%"></div></div></div>
+                    <div class="stat-row">BAT <div class="stat-track"><div class="stat-val" id="energyVal" style="width:100%"></div></div></div>
+                    <div class="stat-row">FUN <div class="stat-track"><div class="stat-val" id="joyVal" style="width:100%"></div></div></div>
+                </div>
+                
+                <div class="bubble" id="bubble">Hello!</div>
+                
+                <div class="bot-container">
+                    <div class="bot" id="bot">
+                        <div class="antenna"></div>
+                        <div class="eyes"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="stats">
-            <div>
-                HUNGER
-                <div class="stat-bar"><div class="stat-fill" id="hungerBar" style="width: 100%"></div></div>
+        <div class="control-panel">
+            <div class="d-pad-row">
+                <button class="action-btn" onclick="bitbot.feed()">🍔</button>
+                <button class="action-btn" onclick="bitbot.play()">🎾</button>
             </div>
-            <div>
-                ENERGY
-                <div class="stat-bar"><div class="stat-fill" id="energyBar" style="width: 100%"></div></div>
-            </div>
-            <div>
-                JOY
-                <div class="stat-bar"><div class="stat-fill" id="joyBar" style="width: 100%"></div></div>
-            </div>
+            <button class="main-btn" onclick="bitbot.toggleSleep()">💤</button>
         </div>
 
-        <div class="controls">
-            <button class="btn" onclick="bot.feed()" title="Feed">🍔</button>
-            <button class="btn" onclick="bot.toggleSleep()" title="Sleep">💤</button>
-            <button class="btn" onclick="bot.play()" title="Play">🎾</button>
-        </div>
+        <div class="brand">BIT-BOT v1.0</div>
     </div>
 
     <script>
-        const bot = {
+        const bitbot = {
             stats: { hunger: 100, energy: 100, joy: 100, lastLogin: Date.now() },
-            state: 'idle', // idle, sleeping
+            state: 'idle',
             
             init() {
                 this.load();
-                this.calcOfflineDecay();
-                this.loop = setInterval(() => this.tick(), 2000);
+                this.calcOffline();
+                this.loop = setInterval(() => this.tick(), 3000);
                 this.updateUI();
             },
 
             tick() {
                 if (this.state === 'sleeping') {
-                    this.stats.energy = Math.min(100, this.stats.energy + 5);
+                    this.stats.energy = Math.min(100, this.stats.energy + 4);
                     this.stats.hunger = Math.max(0, this.stats.hunger - 1);
                 } else {
-                    this.stats.hunger = Math.max(0, this.stats.hunger - 2);
-                    this.stats.energy = Math.max(0, this.stats.energy - 1);
-                    this.stats.joy = Math.max(0, this.stats.joy - 3);
+                    this.stats.hunger = Math.max(0, this.stats.hunger - 1.5);
+                    this.stats.energy = Math.max(0, this.stats.energy - 0.8);
+                    this.stats.joy = Math.max(0, this.stats.joy - 2);
                 }
-                
-                if (this.stats.hunger < 30 || this.stats.joy < 30) this.showMessage("I need attention!");
-                if (this.stats.energy < 10) this.showMessage("Battery Low...");
-                
                 this.save();
                 this.updateUI();
             },
 
             feed() {
-                if (this.state === 'sleeping') return this.wakeUp();
-                this.stats.hunger = Math.min(100, this.stats.hunger + 20);
+                if (this.state === 'sleeping') return this.wake();
+                if (this.stats.hunger >= 95) return this.say("Full!");
+                this.stats.hunger = Math.min(100, this.stats.hunger + 25);
                 this.stats.joy = Math.min(100, this.stats.joy + 5);
-                this.animate('happy', 1000);
-                this.showMessage("Delicious Data!");
+                this.anim('happy', 1200);
+                this.say("Yum!");
                 this.updateUI();
             },
 
             play() {
-                if (this.state === 'sleeping') return this.wakeUp();
-                if (this.stats.energy < 10) return this.showMessage("Too tired to play...");
-                this.stats.joy = Math.min(100, this.stats.joy + 15);
-                this.stats.energy -= 10;
-                this.stats.hunger -= 5;
-                this.animate('happy', 1500);
-                this.showMessage("Fun! Fun! Fun!");
+                if (this.state === 'sleeping') return this.wake();
+                if (this.stats.energy < 15) return this.say("Low Battery...");
+                this.stats.joy = Math.min(100, this.stats.joy + 20);
+                this.stats.energy -= 12;
+                this.stats.hunger -= 8;
+                this.anim('happy', 1500);
+                this.say("Beep Boop!");
                 this.updateUI();
             },
 
             toggleSleep() {
-                if (this.state === 'sleeping') this.wakeUp();
+                if (this.state === 'sleeping') this.wake();
                 else {
                     this.state = 'sleeping';
-                    this.showMessage("Powering Down...");
+                    this.say("Zzz...");
                     document.getElementById('bot').classList.add('sleeping');
                 }
-                this.updateUI();
             },
 
-            wakeUp() {
+            wake() {
                 this.state = 'idle';
-                this.showMessage("System Online!");
+                this.say("Online!");
                 document.getElementById('bot').classList.remove('sleeping');
             },
 
-            animate(className, duration) {
+            anim(cls, dur) {
                 const el = document.getElementById('bot');
-                el.classList.add(className);
-                setTimeout(() => el.classList.remove(className), duration);
+                el.classList.add(cls);
+                setTimeout(() => el.classList.remove(cls), dur);
             },
 
-            showMessage(text) {
-                const msg = document.getElementById('message');
-                msg.textContent = text;
-                setTimeout(() => { if(msg.textContent === text) msg.textContent = "Status: Normal"; }, 3000);
+            say(text) {
+                const b = document.getElementById('bubble');
+                b.textContent = text;
+                b.classList.add('show');
+                setTimeout(() => b.classList.remove('show'), 2000);
             },
 
             updateUI() {
-                document.getElementById('hungerBar').style.width = this.stats.hunger + '%';
-                document.getElementById('energyBar').style.width = this.stats.energy + '%';
-                document.getElementById('joyBar').style.width = this.stats.joy + '%';
+                document.getElementById('hungerVal').style.width = this.stats.hunger + '%';
+                document.getElementById('energyVal').style.width = this.stats.energy + '%';
+                document.getElementById('joyVal').style.width = this.stats.joy + '%';
                 
                 const el = document.getElementById('bot');
                 if (this.stats.hunger < 30 || this.stats.joy < 30) el.classList.add('sad');
                 else el.classList.remove('sad');
             },
 
-            calcOfflineDecay() {
-                const now = Date.now();
-                const hoursPassed = (now - this.stats.lastLogin) / (1000 * 60 * 60);
-                if (hoursPassed > 0.1) {
-                    this.stats.hunger = Math.max(0, this.stats.hunger - (hoursPassed * 10));
-                    this.stats.joy = Math.max(0, this.stats.joy - (hoursPassed * 15));
-                    this.showMessage(`Missed you! (${hoursPassed.toFixed(1)}h)`);
+            calcOffline() {
+                const hours = (Date.now() - this.stats.lastLogin) / 3.6e6;
+                if (hours > 0.1) {
+                    this.stats.hunger = Math.max(0, this.stats.hunger - (hours * 8));
+                    this.stats.joy = Math.max(0, this.stats.joy - (hours * 12));
+                    this.say(`Back! (${hours.toFixed(1)}h)`);
                 }
-                this.stats.lastLogin = now;
             },
 
             save() { this.stats.lastLogin = Date.now(); localStorage.setItem('bitbot_save', JSON.stringify(this.stats)); },
             load() { 
-                const save = localStorage.getItem('bitbot_save');
-                if (save) this.stats = { ...this.stats, ...JSON.parse(save) };
+                const s = localStorage.getItem('bitbot_save');
+                if (s) this.stats = { ...this.stats, ...JSON.parse(s) };
             }
         };
-
-        bot.init();
+        window.bitbot = bitbot;
+        bitbot.init();
     </script>
 </body>
 </html>
